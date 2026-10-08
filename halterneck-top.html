@@ -1,0 +1,796 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mønster: halterneck-top</title>
+<style>
+  @page { size: A4; margin: 0; }
+  :root {
+    --pink: #e8456b; --pink-l: #fde3ea; --pink-xl: #fff4f7;
+    --teal: #1f9e95; --teal-l: #dff4f2;
+    --sun: #f6b73c; --sun-l: #fff3d6;
+    --ink: #2b2433; --mute: #6d6577; --line: #e7dfe9; --bg: #fbf8fb; --card: #fff;
+    --red: #d64545; --red-l: #fde6e6; --green: #2e9b5b; --green-l: #e2f5ea;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5; }
+  #app { max-width: 1100px; margin: 0 auto; padding: 28px 16px 60px; }
+  h1 { font-size: 30px; margin: 0 0 4px; line-height: 1.1; }
+  h2 { font-size: 21px; margin: 0 0 12px; display: flex; gap: 10px; align-items: center; }
+  h3 { font-size: 16px; margin: 0 0 8px; }
+  .kicker { text-transform: uppercase; letter-spacing: 2px; font-size: 12px; font-weight: 700; color: var(--pink); }
+  .sec { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; margin-top: 18px; }
+  .stepnum { width: 34px; height: 34px; border-radius: 50%; background: var(--pink); color: #fff; display: inline-flex;
+    align-items: center; justify-content: center; font-weight: 700; flex: none; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 800px) { .grid2 { grid-template-columns: 1fr; } }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; background: var(--pink); color: #fff; padding: 7px 10px; }
+  td { padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .meter { display: inline-flex; gap: 4px; vertical-align: middle; }
+  .meter i { width: 14px; height: 14px; border-radius: 50%; background: var(--line); display: inline-block; }
+  .meter i.on { background: var(--pink); }
+  .box { border-radius: 12px; padding: 12px 14px; margin: 12px 0; }
+  .tip { background: var(--sun-l); border-left: 5px solid var(--sun); }
+  .warn { background: var(--red-l); border-left: 5px solid var(--red); }
+  .info { background: var(--teal-l); border-left: 5px solid var(--teal); }
+  ul.plain { margin: 0; padding-left: 20px; }
+  .field { display: grid; grid-template-columns: 30px 1fr 92px; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--line); }
+  .field .n { width: 26px; height: 26px; border-radius: 50%; background: var(--teal); color: #fff; font-weight: 700; font-size: 13px;
+    display: flex; align-items: center; justify-content: center; }
+  .field label { font-weight: 600; display: block; }
+  .field small { color: var(--mute); display: block; font-size: 12.5px; line-height: 1.35; }
+  .field input { width: 100%; font-size: 16px; padding: 7px 8px; border: 1.5px solid var(--line); border-radius: 8px; text-align: right; font-family: inherit; }
+  .field input:focus { outline: 2px solid var(--teal); border-color: var(--teal); }
+  .unit { position: relative; }
+  .unit::after { content: attr(data-u); position: absolute; right: -2px; top: 50%; transform: translate(100%, -50%); font-size: 12px; color: var(--mute); }
+  .slider { padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .slider .top { display: flex; justify-content: space-between; font-weight: 600; }
+  .slider output { color: var(--pink); font-weight: 700; }
+  .slider input { width: 100%; accent-color: var(--pink); }
+  .slider small { color: var(--mute); font-size: 12.5px; }
+  #preview { background: var(--pink-xl); border-radius: 12px; padding: 10px; }
+  #preview svg { width: 100%; height: auto; display: block; }
+  .btn { background: var(--pink); color: #fff; border: 0; border-radius: 30px; padding: 13px 26px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  .btn:hover { filter: brightness(0.95); }
+  .btn.ghost { background: #fff; color: var(--pink); border: 2px solid var(--pink); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+  .chip { background: var(--teal-l); color: var(--teal); border-radius: 20px; padding: 3px 12px; font-size: 13px; font-weight: 600; }
+  #warnings:empty { display: none; }
+  #print { display: none; }
+  a.vid { display: inline-flex; align-items: center; gap: 5px; background: #ff0033; color: #fff; text-decoration: none; font-weight: 700;
+    border-radius: 20px; padding: 3px 11px 3px 9px; font-size: 13px; white-space: nowrap; }
+  a.vid::before { content: "▶"; font-size: 10px; }
+  a.vid:hover { filter: brightness(0.9); }
+  .vidrow { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 4px 0 10px; font-size: 13px; color: var(--mute); }
+  .vidrow:empty { display: none; }
+  .step { border: 1.5px solid var(--line); border-radius: 14px; padding: 16px 18px; margin-top: 14px; display: grid; grid-template-columns: 1fr 260px; gap: 18px; }
+  .step.done { border-color: var(--green); background: var(--green-l); }
+  @media (max-width: 800px) { .step { grid-template-columns: 1fr; } }
+  .step h3 { display: flex; align-items: center; gap: 10px; font-size: 18px; margin: 0; }
+  .step h3 .stepnum { width: 30px; height: 30px; font-size: 15px; }
+  .step ol { margin: 6px 0 0; padding-left: 20px; }
+  .step li { margin-bottom: 4px; }
+  .step .fig { background: var(--pink-xl); border-radius: 12px; padding: 8px; align-self: start; }
+  .step .fig svg { width: 100%; height: auto; display: block; }
+  .step .cap { font-size: 12px; color: var(--mute); text-align: center; margin-top: 4px; }
+  .set { display: flex; gap: 6px; flex-wrap: wrap; margin: 4px 0 6px; }
+  .set span { background: var(--teal); color: #fff; border-radius: 20px; padding: 2px 10px; font-size: 12.5px; font-weight: 600; }
+  .set span.o { background: #fff; color: var(--teal); border: 1.5px solid var(--teal); }
+  .mine { background: var(--pink-xl); border: 1.5px dashed var(--pink); border-radius: 12px; padding: 10px 14px; margin: 10px 0 0; }
+  .mine b.lbl { color: var(--pink); }
+  .donebox { margin-top: 10px; font-weight: 600; color: var(--green); display: flex; gap: 8px; align-items: center; cursor: pointer; }
+  .donebox input { width: 18px; height: 18px; accent-color: var(--green); }
+  .progressbar { height: 10px; background: var(--line); border-radius: 6px; overflow: hidden; margin: 6px 0 4px; }
+  .progressbar div { height: 100%; background: var(--green); width: 0; transition: width .3s; }
+  @media print {
+    body.pg #app { display: block; max-width: none; padding: 10mm; }
+    body.pg #app > *:not(.guide) { display: none; }
+    body.pg #print { display: none; }
+    body.pg .step, body.pg .sec { break-inside: avoid; }
+    body.pg .donebox, body.pg .noprint { display: none; }
+  }
+  @media print {
+    body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    #app { display: none; }
+    #print { display: block; }
+    .sheet { width: 210mm; height: 297mm; padding: 10mm; page-break-after: always; overflow: hidden; position: relative; }
+    .sheet:last-child { page-break-after: auto; }
+    .sheet svg { display: block; }
+    .sumpage { font-size: 10.5pt; }
+    .sumpage h1 { font-size: 22pt; }
+    .sumpage table { font-size: 9.5pt; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Claude skriver vurderingen af videoen her (bruges af /sy-mønster) -->
+<script type="application/json" id="analyse">
+{
+  "titel": "Halterneck-top i strik",
+  "video": "https://www.youtube.com/watch?v=s-VB3XTUyOk",
+  "kilde": "Moey Slow Fashion (YouTube)",
+  "beskrivelse": "En kort, tætsiddende top i strik med to trekantskåle, hvor stroppen er en del af skålen og bindes i nakken. Skålene er syet med foer, kan rynkes forneden og sidder på et forstykke. Bagpå er der et glat bånd. Kanterne er bukket dobbelt om, og bundkanten kan sys med tvillingenål.",
+  "samlet": 3,
+  "samletTekst": "Middel. Konstruktionen er vist tydeligt trin for trin, men videoen viser ingen mål. Mønsteret her er derfor mit eget, tegnet ud fra dine mål. Ryg, forstykke og stropper er enkle. Skålene skal nok justeres efter første prøve.",
+  "dele": [
+    {"del": "Rygbånd", "niveau": 5, "hvorfor": "Et lige stykke, der regnes ud fra underbrystmål og stræk"},
+    {"del": "Forstykke", "niveau": 4, "hvorfor": "Enkel form. Længden vælger du selv"},
+    {"del": "Stropper", "niveau": 5, "hvorfor": "Lange og bindes i nakken, så de tilpasses ved påklædning"},
+    {"del": "Skåle", "niveau": 2, "hvorfor": "Pasformen afhænger af brystets form, som tal ikke fanger. Regn med 1 til 2 prøverunder"},
+    {"del": "Syning (fremgangsmåde)", "niveau": 5, "hvorfor": "Alle trin er vist og forklaret i videoen"}
+  ],
+  "viser": ["Rækkefølgen delene sys i", "Indstillinger på symaskinen", "Stoftype: strik med mindst 40 % stræk", "Sømrum: 1 cm", "Kantafslutning, også med tvillingenål"],
+  "viserIkke": ["Mål på mønsterdelene (de står i et betalt mønster)", "Hvordan toppen tilpasses forskellige bryststørrelser", "Pasform på andre kroppe end hendes egen"],
+  "note": "Designeren sælger sit eget mønster. Vil du have et afprøvet mønster i standardstørrelser, så køb hendes. Det her er et selvstændigt mønster efter dine mål.",
+  "tider": {
+    "klip": [["0:16", "stof"], ["0:34", "læg delene"], ["0:59", "klip"]],
+    "skaale": [["1:35", "nåle"], ["2:16", "indstillinger"], ["3:09", "vend"]],
+    "rynk": [["3:39", "risting"], ["4:07", "træk"]],
+    "saml": [["4:12", "nåle"], ["4:31", "sy"]],
+    "ryg": [["5:22", "fold og sy"]],
+    "sider": [["6:00", "nåle"], ["6:35", "sy"]],
+    "bund": [["6:52", "fold"], ["7:30", "tvillingenål"], ["8:12", "sy"]],
+    "faerdig": [["8:31", "resultatet"]]
+  }
+}
+</script>
+
+<div id="app">
+  <div class="kicker">Mønster efter dine mål</div>
+  <h1 id="a-titel">…</h1>
+  <p style="color:var(--mute);margin:0;">Video: <a id="a-link" href="#" target="_blank" rel="noopener"></a> · <span id="a-kilde"></span></p>
+
+  <!-- 1. VURDERING -->
+  <div class="sec">
+    <h2><span class="stepnum">1</span> Claudes vurdering af videoen</h2>
+    <p id="a-beskrivelse"></p>
+    <div class="box info">
+      <b>Hvor godt kan jeg lave det?</b> <span class="meter" id="a-meter"></span> <b id="a-score"></b>
+      <div id="a-samlet" style="margin-top:4px;"></div>
+    </div>
+    <table>
+      <thead><tr><th style="width:28%">Del</th><th style="width:22%">Sikkerhed</th><th>Hvorfor</th></tr></thead>
+      <tbody id="a-dele"></tbody>
+    </table>
+    <div class="grid2" style="margin-top:16px;">
+      <div><h3>✅ Videoen viser</h3><ul class="plain" id="a-viser"></ul></div>
+      <div><h3>❌ Videoen viser ikke</h3><ul class="plain" id="a-viserikke"></ul></div>
+    </div>
+    <div class="box tip" id="a-note"></div>
+  </div>
+
+  <!-- 2. MÅL -->
+  <div class="sec">
+    <h2><span class="stepnum">2</span> Dine mål</h2>
+    <div class="grid2">
+      <div>
+        <p style="margin-top:0">Mål direkte på kroppen i undertøj, med et blødt målebånd. Stram ikke. Bed gerne en anden om at måle.</p>
+        <div class="field"><span class="n">1</span><div><label for="bust">Brystmål</label><small>Rundt om det bredeste sted på brystet</small></div><div class="unit" data-u="cm"><input id="bust" type="number" step="0.5" value="88"></div></div>
+        <div class="field"><span class="n">2</span><div><label for="ub">Underbrystmål</label><small>Rundt lige under brystet, tæt ind til kroppen</small></div><div class="unit" data-u="cm"><input id="ub" type="number" step="0.5" value="74"></div></div>
+        <div class="field"><span class="n">3</span><div><label for="bund">Bundmål</label><small>Rundt om kroppen der, hvor toppen skal slutte</small></div><div class="unit" data-u="cm"><input id="bund" type="number" step="0.5" value="72"></div></div>
+        <div class="field"><span class="n">4</span><div><label for="laengde">Længde under brystet</label><small>Fra underbrystet lodret ned til hvor toppen skal slutte</small></div><div class="unit" data-u="cm"><input id="laengde" type="number" step="0.5" value="8"></div></div>
+        <div class="field"><span class="n">5</span><div><label for="skaalH">Skålhøjde</label><small>Fra underbrystet op over brystvorten til hvor skålen skal slutte (typisk 3 til 6 cm over brystvorten)</small></div><div class="unit" data-u="cm"><input id="skaalH" type="number" step="0.5" value="15"></div></div>
+        <div class="field"><span class="n">6</span><div><label for="strop">Strop til nakken</label><small>Fra skålens top, op over skulderen, til midt bag i nakken</small></div><div class="unit" data-u="cm"><input id="strop" type="number" step="0.5" value="30"></div></div>
+        <div class="field"><span class="n">7</span><div><label for="straek">Stoffets stræk</label><small>Stræk 10 cm stof: når det 14 cm, er strækket 40 %</small></div><div class="unit" data-u="%"><input id="straek" type="number" step="5" value="40"></div></div>
+      </div>
+      <div>
+        <svg viewBox="0 0 300 380" style="width:100%;max-width:360px;display:block;margin:0 auto;">
+          <!-- simpel krop -->
+          <path d="M128 18 Q150 6 172 18 L175 52 Q215 60 245 78 Q258 90 252 120 L238 200 Q232 250 238 330 L62 330 Q68 250 62 200 L48 120 Q42 90 55 78 Q85 60 125 52 Z" fill="#f6e7ea" stroke="#c9b3ba" stroke-width="2"/>
+          <path d="M92 150 Q110 118 140 150 Q120 178 92 150 Z" fill="#efd3da" stroke="#c9b3ba"/>
+          <path d="M160 150 Q190 118 208 150 Q180 178 160 150 Z" fill="#efd3da" stroke="#c9b3ba"/>
+          <circle cx="116" cy="152" r="3" fill="#c9a0ab"/><circle cx="184" cy="152" r="3" fill="#c9a0ab"/>
+          <!-- 1 bryst -->
+          <line x1="58" y1="152" x2="242" y2="152" stroke="#1f9e95" stroke-width="2.5" stroke-dasharray="6 4"/>
+          <circle cx="262" cy="152" r="11" fill="#1f9e95"/><text x="262" y="157" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">1</text>
+          <!-- 2 underbryst -->
+          <line x1="60" y1="185" x2="240" y2="185" stroke="#1f9e95" stroke-width="2.5" stroke-dasharray="6 4"/>
+          <circle cx="262" cy="185" r="11" fill="#1f9e95"/><text x="262" y="190" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">2</text>
+          <!-- 3 bund -->
+          <line x1="62" y1="240" x2="238" y2="240" stroke="#1f9e95" stroke-width="2.5" stroke-dasharray="6 4"/>
+          <circle cx="262" cy="240" r="11" fill="#1f9e95"/><text x="262" y="245" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">3</text>
+          <!-- 4 længde -->
+          <line x1="150" y1="187" x2="150" y2="238" stroke="#e8456b" stroke-width="2.5" marker-end="url(#mk)" marker-start="url(#mk)"/>
+          <circle cx="164" cy="214" r="11" fill="#e8456b"/><text x="164" y="219" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">4</text>
+          <!-- 5 skålhøjde -->
+          <path d="M184 185 Q192 160 184 152 L180 118" stroke="#e8456b" stroke-width="2.5" fill="none"/>
+          <circle cx="206" cy="112" r="11" fill="#e8456b"/><text x="206" y="117" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">5</text>
+          <!-- 6 strop -->
+          <path d="M116 118 Q112 80 138 50 Q150 40 150 36" stroke="#f6b73c" stroke-width="3" fill="none" stroke-dasharray="2 4" stroke-linecap="round"/>
+          <circle cx="96" cy="82" r="11" fill="#f6b73c"/><text x="96" y="87" font-size="13" font-weight="700" fill="#fff" text-anchor="middle">6</text>
+          <defs><marker id="mk" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#e8456b"/></marker></defs>
+          <text x="150" y="365" font-size="12" fill="#6d6577" text-anchor="middle">Tegningen viser omtrent hvor du måler</text>
+        </svg>
+        <div id="warnings" class="box warn"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. JUSTERINGER -->
+  <div class="sec" id="justeringer">
+    <h2><span class="stepnum">3</span> Justeringer efter prøve</h2>
+    <p style="margin-top:0">Lad dem stå på 0 til første prøve. Ret bagefter efter hvordan prøven sidder.</p>
+    <div class="grid2">
+      <div>
+        <div class="slider"><div class="top"><span>Skålens højde</span><output id="o-hAdj"></output></div><input id="hAdj" type="range" min="-4" max="4" step="0.5" value="0"><small>Skålen går for lavt? Skru op. Den står ud foroven? Skru ned.</small></div>
+        <div class="slider"><div class="top"><span>Ekstra fylde i skålen</span><output id="o-fylde"></output></div><input id="fylde" type="range" min="0" max="6" step="0.5" value="0"><small>Skålen er for flad eller strammer over brystet? Skru op. Det rynkes ind forneden.</small></div>
+        <div class="slider"><div class="top"><span>Rynk forneden</span><output id="o-rynk"></output></div><input id="rynk" type="range" min="0" max="40" step="5" value="10"><small>Hvor meget skålens underkant rynkes. 0 = glat skål.</small></div>
+      </div>
+      <div>
+        <div class="slider"><div class="top"><span>Stramhed om kroppen</span><output id="o-ease"></output></div><input id="ease" type="range" min="0" max="20" step="1" value="10"><small>Hvor meget mindre end kroppen ryg og forstykke klippes. Sættes automatisk ud fra stoffets stræk. <label><input type="checkbox" id="easeAuto" checked> automatisk</label></small></div>
+        <div class="slider"><div class="top"><span>Stroppens bredde (færdig)</span><output id="o-stropB"></output></div><input id="stropB" type="range" min="1.5" max="4" step="0.5" value="2.5"><small>Smal strop ser fin ud, bred strop sidder mere behageligt.</small></div>
+        <div class="slider"><div class="top"><span>Sømrum</span><output>1 cm</output></div><small>Lagt til på alle kanter. Bundkanter har 2 cm, så de kan bukkes dobbelt.</small></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. MØNSTER -->
+  <div class="sec" id="moenster">
+    <h2><span class="stepnum">4</span> Dit mønster</h2>
+    <div class="chips" id="chips"></div>
+    <div id="preview"></div>
+    <p style="font-size:13px;color:var(--mute);margin:6px 0 0;">Hel linje = klippelinje. Pink stiplet linje = sylinje. Stroppen er tegnet kortere for at spare papir; forlæng den som der står på delen.</p>
+    <h3 style="margin-top:16px;">Klippeliste</h3>
+    <table><thead><tr><th>Del</th><th>Klip</th><th>Færdige mål</th></tr></thead><tbody id="cutlist"></tbody></table>
+    <div class="box info"><b>Sådan printer du i rigtig størrelse:</b> Tryk på knappen. Vælg A4, <b>skalering 100 %</b> (ikke "Tilpas til side") og ingen margener. Mål prøvefirkanten på side 2, før du klipper. Den skal være præcis 10 × 10 cm.</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;">
+      <button class="btn" id="printBtn">🖨️ Print mønsteret</button>
+      <button class="btn ghost" id="resetBtn">Nulstil justeringer</button>
+    </div>
+    <p style="font-size:13px;color:var(--mute);margin-top:14px;">Når mønsteret er printet og klippet ud, så gå videre til trin 5 nedenfor.</p>
+  </div>
+
+  <!-- 5. SY DEN -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <pattern id="g-str" width="12" height="12" patternUnits="userSpaceOnUse"><rect width="12" height="12" fill="#f26b86"/><rect width="12" height="3" fill="#fff6e8"/><rect y="6" width="12" height="1.5" fill="#7a3b46"/></pattern>
+      <pattern id="g-rb" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(30)"><rect width="8" height="40" fill="#7fd1c7"/><rect x="8" width="8" height="40" fill="#f7c95c"/><rect x="16" width="8" height="40" fill="#f28aa5"/><rect x="24" width="8" height="40" fill="#a98fe0"/><rect x="32" width="8" height="40" fill="#8fc7f2"/></pattern>
+      <marker id="g-ap" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#e8456b"/></marker>
+      <marker id="g-at" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#1f9e95"/></marker>
+      <marker id="g-ak" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#2b2433"/></marker>
+    </defs>
+  </svg>
+
+  <div class="sec guide" id="sy">
+    <h2><span class="stepnum">5</span> Sy toppen, trin for trin</h2>
+    <div class="grid2">
+      <div>
+        <p style="margin-top:0">Hav videoen åben ved siden af symaskinen. De røde knapper som <a class="vid" id="exampleVid" href="#" target="_blank" rel="noopener">2:16</a> åbner videoen præcis det rigtige sted. Læs trinnet her først, se klippet, og sæt så videoen på pause, mens du syr.</p>
+        <p><b>Undertekster på dansk:</b> tryk ⚙️ i videoen → Undertekster → Automatisk oversæt → Dansk. Sæt farten til 0,75, hvis det går for hurtigt.</p>
+      </div>
+      <div>
+        <div class="box info" style="margin-top:0"><b>📐 Dit mønster er ikke hendes.</b> Det er regnet ud efter dine mål, så delene kan se lidt anderledes ud end i videoen. Sy efter mærkerne på dit eget mønster, og brug videoen til at se, hvordan man gør. De pink stiplede bokse viser, hvor der er forskel.</div>
+        <div class="noprint"><b>Dine fremskridt</b> <span id="progressTxt" style="color:var(--mute)"></span><div class="progressbar"><div id="progressBar"></div></div></div>
+      </div>
+    </div>
+
+    <div class="step" data-step="klip">
+      <div>
+        <h3><span class="stepnum">1</span> Klip stoffet</h3>
+        <div class="vidrow" data-tid="klip"></div>
+        <ol>
+          <li>Vask og tør stoffet først, så toppen ikke krymper bagefter.</li>
+          <li>Læg stoffet fladt, og find den retning, det strækker <b>mest</b>.</li>
+          <li>Læg papirdelene, så de grønne <b>STRÆK</b>-pile følger stoffets stræk. Sæt nåle i.</li>
+          <li>Klip langs den hele linje.</li>
+          <li>Skålen skal klippes 4 gange: 2 i yderstof og 2 i foer. Fold stoffet dobbelt med retsiderne mod hinanden, så bliver parret automatisk spejlvendt.</li>
+        </ol>
+        <div class="box warn"><b>⚠️ Den hyppigste fejl:</b> ligger strækket den forkerte vej, kan toppen ikke komme over hovedet.</div>
+        <label class="donebox"><input type="checkbox"> Færdig</label>
+      </div>
+      <div class="fig">
+        <svg viewBox="0 0 300 250">
+          <rect x="10" y="10" width="280" height="200" rx="6" fill="url(#g-str)" stroke="#2b2433" stroke-width="2"/>
+          <g fill="#fff" fill-opacity="0.92" stroke="#2b2433" stroke-width="1.5" stroke-dasharray="5 3">
+            <path d="M22 120 L44 60 L44 22 L54 22 L54 60 Q72 92 92 120 Z"/><path d="M178 120 L156 60 L156 22 L146 22 L146 60 Q128 92 108 120 Z"/>
+            <rect x="190" y="40" width="88" height="45" rx="3"/><rect x="24" y="140" width="120" height="50" rx="3"/><rect x="160" y="140" width="118" height="50" rx="3"/>
+          </g>
+          <g font-size="9" fill="#2b2433" text-anchor="middle" font-weight="700"><text x="58" y="112">Skål</text><text x="142" y="112">Skål (vendt)</text><text x="234" y="66">Forstykke</text><text x="84" y="168">Rygstykke</text><text x="219" y="168">2 foer-skåle</text></g>
+          <line x1="30" y1="232" x2="270" y2="232" stroke="#e8456b" stroke-width="4" marker-start="url(#g-ap)" marker-end="url(#g-ap)"/>
+          <text x="150" y="226" font-size="10" font-weight="700" fill="#e8456b" text-anchor="middle">STOFFET STRÆKKER SIG HERHEN</text>
+        </svg>
+        <div class="cap">Eksempel på udlægning</div>
+      </div>
+    </div>
+
+    <div class="step" data-step="skaale">
+      <div>
+        <h3><span class="stepnum">2</span> Sy skålene</h3>
+        <div class="vidrow" data-tid="skaale"></div>
+        <div class="set"><span>Ligesting</span><span>Længde 2,5 til 3</span><span>Spænding 3 til 4</span><span class="o">Stræknål</span></div>
+        <ol>
+          <li>Læg en yderskål og en foerskål <b>ret mod ret</b>.</li>
+          <li>Sæt nåle langs begge sider, hele vejen op ad stroppen.</li>
+          <li>Sy begge sider langs den stiplede linje (1 cm fra kanten). <b>Lad top og bund være åbne.</b></li>
+          <li>Klip lidt af sømrummet væk i hjørnet, hvor stroppen møder skålen.</li>
+          <li>Vend skålen med en sikkerhedsnål gennem stroppen, og pres den flad.</li>
+        </ol>
+        <div class="mine"><b class="lbl">📐 Dit mønster:</b> stroppen er <b data-v="Ls"></b> lang i alt. Husk at du forlængede den på papiret, før du klippede.</div>
+        <label class="donebox"><input type="checkbox"> Færdig</label>
+      </div>
+      <div class="fig">
+        <svg viewBox="0 0 300 190">
+          <path d="M25 165 Q 40 110 70 70 L 74 20 L 86 20 L 84 80 Q 110 130 125 172 Q 75 182 25 172 Z" fill="#f7b3c2" stroke="#2b2433" stroke-width="1.5"/>
+          <path d="M33 163 Q 47 112 76 74 L 79 24" stroke="#e8456b" stroke-width="2" stroke-dasharray="5 3" fill="none"/>
+          <path d="M117 168 Q 103 128 78 82 L 81 24" stroke="#e8456b" stroke-width="2" stroke-dasharray="5 3" fill="none"/>
+          <text x="75" y="186" font-size="9" fill="#6d6577" text-anchor="middle">bund åben</text><text x="92" y="16" font-size="9" fill="#6d6577">top åben</text>
+          <line x1="140" y1="105" x2="165" y2="105" stroke="#2b2433" stroke-width="2" marker-end="url(#g-ak)"/>
+          <path d="M185 165 Q 200 110 230 70 L 234 20 L 246 20 L 244 80 Q 270 130 285 172 Q 235 182 185 172 Z" fill="url(#g-str)" stroke="#2b2433" stroke-width="1.5"/>
+          <line x1="240" y1="40" x2="240" y2="88" stroke="#1f9e95" stroke-width="2.5" marker-end="url(#g-at)"/>
+          <text x="235" y="186" font-size="9" fill="#6d6577" text-anchor="middle">vendt med retsiden ud</text>
+        </svg>
+        <div class="cap">Stiplet = der hvor du syr</div>
+      </div>
+    </div>
+
+    <div class="step" data-step="rynk">
+      <div>
+        <h3><span class="stepnum">3</span> Rynk skålene</h3>
+        <div class="vidrow" data-tid="rynk"></div>
+        <div class="set"><span>Ligesting</span><span>Længde 4</span><span class="o">Ingen hæftning</span></div>
+        <ol>
+          <li>Find de to <b>▲-mærker</b> på skålens underkant.</li>
+          <li>Sy lange sting tæt ved kanten mellem mærkerne, gennem begge lag. Hæft ikke, og lad trådene være lange.</li>
+          <li>Træk forsigtigt i overtråden, til underkanten måler <b data-v="base"></b>.</li>
+          <li>Fordel rynkerne jævnt, og bind trådene.</li>
+        </ol>
+        <div class="mine"><b class="lbl">📐 Dit mønster:</b> i videoen er rynkning valgfri. Din skål er klippet <b data-v="gather"></b> bredere forneden, så den <b>skal</b> rynkes for at passe til forstykket.</div>
+        <label class="donebox"><input type="checkbox"> Færdig</label>
+      </div>
+      <div class="fig">
+        <svg viewBox="0 0 300 130">
+          <text x="75" y="14" font-size="10" font-weight="700" text-anchor="middle">Før</text>
+          <rect x="15" y="25" width="120" height="70" fill="url(#g-str)" stroke="#2b2433" stroke-width="1.5"/>
+          <g stroke="#2b2433" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="88" x2="42" y2="88"/><line x1="52" y1="88" x2="72" y2="88"/><line x1="82" y1="88" x2="102" y2="88"/><line x1="112" y1="88" x2="128" y2="88"/></g>
+          <path d="M128 88 q 12 0 14 18" stroke="#e8456b" stroke-width="2" fill="none"/>
+          <line x1="150" y1="60" x2="170" y2="60" stroke="#2b2433" stroke-width="2" marker-end="url(#g-ak)"/>
+          <text x="235" y="14" font-size="10" font-weight="700" text-anchor="middle">Efter</text>
+          <path d="M190 25 L 280 25 L 268 95 Q 262 88 256 95 Q 250 88 244 95 Q 238 88 232 95 Q 226 88 220 95 Q 214 88 208 95 Q 204 90 202 95 Z" fill="url(#g-str)" stroke="#2b2433" stroke-width="1.5"/>
+          <path d="M268 95 q 14 0 16 22" stroke="#e8456b" stroke-width="2" fill="none"/>
+          <text x="282" y="127" font-size="9" fill="#e8456b" text-anchor="end">træk her</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="step" data-step="saml">
+      <div>
+        <h3><span class="stepnum">4</span> Sæt skålene på forstykket</h3>
+        <div class="vidrow" data-tid="saml"></div>
+        <div class="set"><span>Zigzag</span><span>Spænding 3 til 4</span></div>
+        <ol>
+          <li>Læg forstykket med <b>retsiden op</b>.</li>
+          <li>Læg en skål med yderstoffet nedad langs forstykkets overkant, <b>ret mod ret</b>. Skålens inderste hjørne skal ramme <b>▼-mærket midt foran</b>.</li>
+          <li>Læg den anden skål fra mærket og ud til den anden side.</li>
+          <li>Sæt nåle i, og sy med zigzag 1 cm fra kanten. Sy langsomt ind mod midten.</li>
+          <li>Fold skålene op, og pres sømmen.</li>
+        </ol>
+        <label class="donebox"><input type="checkbox"> Færdig</label>
+      </div>
+      <div class="fig">
+        <svg viewBox="0 0 300 210">
+          <path d="M60 120 L240 120 L236 195 L64 195 Z" fill="url(#g-str)" stroke="#2b2433" stroke-width="2"/>
+          <path d="M150 120 L60 120 L80 60 L82 22 L92 22 L92 60 Q118 92 150 120 Z" fill="url(#g-rb)" stroke="#2b2433" stroke-width="1.5" opacity="0.92"/>
+          <path d="M150 120 L240 120 L220 60 L218 22 L208 22 L208 60 Q182 92 150 120 Z" fill="url(#g-rb)" stroke="#2b2433" stroke-width="1.5" opacity="0.92"/>
+          <path d="M145 124 h10 l-5 8 z" fill="#e8456b"/>
+          <polyline points="62,128 70,134 78,128 86,134 94,128 102,134 110,128 118,134 126,128 134,134 142,128 158,128 166,134 174,128 182,134 190,128 198,134 206,128 214,134 222,128 230,134 238,128" fill="none" stroke="#e8456b" stroke-width="2"/>
+          <text x="150" y="168" font-size="11" font-weight="700" text-anchor="middle" fill="#fff" stroke="#2b2433" stroke-width="0.4">Forstykke</text>
+          <text x="150" y="207" font-size="9" fill="#6d6577" text-anchor="middle">Foeret vender op. Skålene mødes ved ▼</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="step" data-step="ryg">
+      <div>
+        <h3><span class="stepnum">5</span> Sy overkanten på rygstykket</h3>
+        <div class="vidrow" data-tid="ryg"></div>
+        <div class="set"><span>Bred zigzag</span><span class="o">Buk 0,5 + 0,5 cm</span></div>
+        <ol>
+          <li>Buk overkanten 0,5 cm ind mod vrangsiden, og så 0,5 cm igen.</li>
+          <li>Sæt clips i, og sy tæt ved folden med bred zigzag.</li>
+        </ol>
+        <div class="box warn"><b>⚠️ Lad maskinen trække.</b> Strækker du stoffet, mens du syr, bliver kanten bølget og for lang.</div>
+        <label class="donebox"><input type="checkbox"> Færdig</label>
+      </div>
+      <div class="fig">
+        <svg viewBox="0 0 300 150">
+          <text x="150" y="14" font-size="10" font-weight="700" text-anchor="middle">Dobbelt ombuk set fra siden</text>
+          <g transform="translate(10,30)"><text x="40" y="0" font-size="9" text-anchor="middle" fill="#6d6577">1. Stoffet</text><line x1="40" y1="15" x2="40" y2="100" stroke="#e8456b" stroke-width="6" stroke-linecap="round"/></g>
+          <g transform="translate(105,30)"><text x="40" y="0" font-size="9" text-anchor="middle" fill="#6d6577">2. Buk én gang</text><path d="M40 100 L40 25 Q40 15 50 15 Q58 15 58 25 L58 45" stroke="#e8456b" stroke-width="6" fill="none" stroke-linecap="round"/></g>
+          <g transform="translate(200,30)"><text x="40" y="0" font-size="9" text-anchor="middle" fill="#6d6577">3. Buk igen</text><path d="M40 100 L40 25 Q40 15 50 15 Q60 15 60 25 L60 50 Q60 58 52 58 Q46 58 46 50 L46 32" stroke="#e8456b" stroke-width="5" fill="none" stroke-linecap="round"/><line x1="25" y1="42" x2="75" y2="42" stroke="#1f9e95" stroke-width="2" stroke-dasharray="4 3"/><text x="78" y="45" font-size="8" fill="#1f9e95">sy</text></g>
+        </svg>
+        <div class="cap">Den rå kant ender gemt i folden</div>
+      </div>
+    </div>
+
+    <div class="step" data-step="sider">
+      <div>
+        <h3><span class="stepnum">6</span> Sy siderne sammen</h3>
+        <div class="vidrow" data-tid="sider"></div>
+        <div class="set"><span>Zigzag</span><span class="o">Ret mod ret</span></div>
+        <ol>
+          <li>Læg forstykket (med skåle) og rygstykket <b>ret mod ret</b>, så hjørnerne passer.</li>
+          <li>Sæt nåle i begge sider, og sy med zigzag 1 cm fra kanten.</li>
+          <li>Vend toppen.</li>
+        </ol>
+        <div class="mine"><b class="lbl">📐 Prøv den på nu:</b> det er det bedste tidspunkt at mærke pasformen. Sidder den for stramt eller løst, kan du stadig sy siderne om. Læg mærke til, hvordan skålene sidder, til trin 6 nederst.</div>
+        <label class="donebox"><input type="checkbox"> Færdig</label>
+      </div>
+      <div class="fig">
+        <svg viewBox="0 0 300 150">
+          <rect x="40" y="20" width="220" height="110" rx="4" fill="url(#g-str)" stroke="#2b2433" stroke-width="2"/>
+          <rect x="40" y="20" width="220" height="110" rx="4" fill="#fff" opacity="0.35"/>
+          <polyline points="50,22 44,32 52,42 44,52 52,62 44,72 52,82 44,92 52,102 44,112 50,126" fill="none" stroke="#e8456b" stroke-width="2.5"/>
+          <polyline points="250,22 256,32 248,42 256,52 248,62 256,72 248,82 256,92 248,102 256,112 250,126" fill="none" stroke="#e8456b" stroke-width="2.5"/>
+          <circle cx="42" cy="22" r="5" fill="#f6b73c"/><circle cx="258" cy="22" r="5" fill="#f6b73c"/><circle cx="42" cy="128" r="5" fill="#f6b73c"/><circle cx="258" cy="128" r="5" fill="#f6b73c"/>
+          <text x="150" y="80" font-size="11" font-weight="700" text-anchor="middle">For- og rygstykke, ret mod ret</text>
+          <text x="150" y="146" font-size="9" fill="#6d6577" text-anchor="middle">Gule prikker: hjørner der skal passe</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="step" data-step="bund">
+      <div>
+        <h3><span class="stepnum">7</span> Kanten forneden</h3>
+        <div class="vidrow" data-tid="bund"></div>
+        <p style="margin:0 0 4px;"><b>✅ Nem (til prøven):</b> buk kanten 1 cm op og 1 cm igen. Sæt clips i, og sy med zigzag tæt ved folden.</p>
+        <p style="margin:0;"><b>⭐ Pæn (til den rigtige top):</b> brug tvillingenål med ligesting, længde 3. Tråd en trådrulle i hver nål, spolen er uændret. Sy fra retsiden, og lad stingene overlappe lidt til sidst i stedet for at hæfte.</p>
+        <div class="box tip"><b>💡 Gem tvillingenålen</b> til den top, du syr, når mønsteret sidder godt.</div>
+        <label class="donebox"><input type="checkbox"> Færdig</label>
+      </div>
+      <div class="fig">
+        <svg viewBox="0 0 300 140">
+          <text x="150" y="14" font-size="10" font-weight="700" text-anchor="middle">Tvillingenål, forside</text>
+          <rect x="20" y="22" width="260" height="40" rx="4" fill="url(#g-str)"/>
+          <g stroke="#2b2433" stroke-width="2.5" stroke-linecap="round"><line x1="30" y1="36" x2="270" y2="36" stroke-dasharray="18 8"/><line x1="30" y1="50" x2="270" y2="50" stroke-dasharray="18 8"/></g>
+          <text x="150" y="88" font-size="10" font-weight="700" text-anchor="middle">Bagside: zigzag, så kanten kan strække</text>
+          <rect x="20" y="96" width="260" height="40" rx="4" fill="#f7b3c2"/>
+          <polyline points="30,108 42,124 54,108 66,124 78,108 90,124 102,108 114,124 126,108 138,124 150,108 162,124 174,108 186,124 198,108 210,124 222,108 234,124 246,108 258,124 270,108" fill="none" stroke="#2b2433" stroke-width="2"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="step" data-step="faerdig">
+      <div>
+        <h3><span class="stepnum">8</span> Færdig!</h3>
+        <div class="vidrow" data-tid="faerdig"></div>
+        <ol>
+          <li>Klip løse tråde af, og pres toppen let.</li>
+          <li>Pynt, hvis du vil: en lille sløjfe eller perler midt foran.</li>
+          <li>Bind stropperne i nakken, og prøv den på. Gå så videre til trin 6.</li>
+        </ol>
+        <label class="donebox"><input type="checkbox"> Færdig</label>
+      </div>
+      <div class="fig" style="text-align:center;">
+        <svg viewBox="0 0 200 150" style="max-width:180px;margin:0 auto;">
+          <g fill="#f6b73c"><path d="M100 4 l9 20 22 3 -16 15 4 22 -19 -11 -19 11 4 -22 -16 -15 22 -3z"/></g>
+          <circle cx="100" cy="95" r="48" fill="#e8456b"/><circle cx="100" cy="95" r="39" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="4 4"/>
+          <text x="100" y="91" font-size="14" font-weight="800" fill="#fff" text-anchor="middle">PRØVE 1</text><text x="100" y="109" font-size="14" font-weight="800" fill="#fff" text-anchor="middle">FÆRDIG!</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. VURDÉR PRØVEN -->
+  <div class="sec guide" id="proeve">
+    <h2><span class="stepnum">6</span> Vurdér prøven, og ret mønsteret</h2>
+    <p style="margin-top:0">Find det, du ser på prøven, og ret skyderen i <a href="#justeringer">trin 3</a>. Mønsteret tegnes om med det samme, så du kan printe en ny version. Ret kun én eller to ting ad gangen.</p>
+    <table>
+      <thead><tr><th style="width:38%">Det ser du på prøven</th><th style="width:34%">Ret denne skyder</th><th>Hvor meget</th></tr></thead>
+      <tbody>
+        <tr><td>Skålen dækker for lidt foroven</td><td>Skålens højde ↑</td><td>+1 til 2 cm</td></tr>
+        <tr><td>Skålen står ud eller folder foroven</td><td>Skålens højde ↓</td><td>−1 cm</td></tr>
+        <tr><td>Skålen er flad eller strammer over brystet</td><td>Ekstra fylde i skålen ↑</td><td>+1 til 2 cm</td></tr>
+        <tr><td>Skålen har for meget stof og poser</td><td>Ekstra fylde ↓ eller Rynk ↓</td><td>−1 cm eller −10 %</td></tr>
+        <tr><td>Toppen sidder løst om kroppen</td><td>Stramhed om kroppen ↑ (slå "automatisk" fra)</td><td>+2 %</td></tr>
+        <tr><td>Toppen strammer eller ruller op</td><td>Stramhed om kroppen ↓ (slå "automatisk" fra)</td><td>−2 %</td></tr>
+        <tr><td>Stropperne skærer ind i nakken</td><td>Stroppens bredde ↑</td><td>+0,5 til 1 cm</td></tr>
+        <tr><td>Toppen er for kort eller for lang</td><td>Målet "Længde under brystet"</td><td>Efter behov</td></tr>
+      </tbody>
+    </table>
+    <div class="box info"><b>📸 Eller spørg Claude:</b> tag 3 billeder af prøven på (forfra, fra siden og bagfra), og send dem sammen med et par ord om, hvordan den føles. Så får du at vide, hvilke skydere du skal ændre.</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;" class="noprint">
+      <button class="btn ghost" id="printGuideBtn">🖨️ Print vejledningen</button>
+      <button class="btn ghost" id="resetStepsBtn">Nulstil fremskridt</button>
+    </div>
+    <p style="font-size:13px;color:var(--mute);margin-top:14px;">Video: <span id="a-kilde2"></span>. Mønster, tekst og tegninger på denne side er egne. Ny video? Skriv <code>/sy-moenster</code> og linket i Claude.</p>
+  </div>
+</div>
+
+<div id="print"></div>
+
+<script>
+(function () {
+  "use strict";
+  var A = JSON.parse(document.getElementById("analyse").textContent);
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); };
+  var meter = function (n) { var h = ""; for (var i = 1; i <= 5; i++) h += '<i class="' + (i <= n ? "on" : "") + '"></i>'; return '<span class="meter">' + h + "</span>"; };
+  var ord = ["", "Lav", "Lav til middel", "Middel", "God", "Høj"];
+
+  // ---------- Vurdering ----------
+  document.title = "Mønster: " + A.titel;
+  $("a-titel").textContent = A.titel;
+  $("a-link").textContent = A.video; $("a-link").href = A.video;
+  $("a-kilde").textContent = A.kilde || "";
+  $("a-beskrivelse").textContent = A.beskrivelse;
+  $("a-meter").outerHTML = meter(A.samlet);
+  $("a-score").textContent = ord[A.samlet] || "";
+  $("a-samlet").textContent = A.samletTekst;
+  $("a-dele").innerHTML = A.dele.map(function (d) { return "<tr><td><b>" + esc(d.del) + "</b></td><td>" + meter(d.niveau) + "</td><td>" + esc(d.hvorfor) + "</td></tr>"; }).join("");
+  $("a-viser").innerHTML = A.viser.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("");
+  $("a-viserikke").innerHTML = A.viserIkke.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("");
+  $("a-note").innerHTML = "<b>💡 Bemærk:</b> " + esc(A.note);
+  $("a-kilde2").textContent = (A.kilde || "") + ", " + A.video;
+
+  // ---------- Videoknapper ----------
+  var secs = function (t) { return String(t).split(":").reduce(function (s, x) { return s * 60 + (parseInt(x, 10) || 0); }, 0); };
+  var vidUrl = function (t) { return A.video + (A.video.indexOf("?") < 0 ? "?" : "&") + "t=" + secs(t) + "s"; };
+  var T = A.tider || {};
+  document.querySelectorAll("[data-tid]").forEach(function (el) {
+    var list = T[el.getAttribute("data-tid")];
+    if (!list || !list.length) { el.innerHTML = ""; return; }
+    el.innerHTML = "Se i videoen: " + list.map(function (x) {
+      return '<a class="vid" target="_blank" rel="noopener" href="' + esc(vidUrl(x[0])) + '">' + esc(x[0]) + " " + esc(x[1] || "") + "</a>";
+    }).join("");
+  });
+  var ex = $("exampleVid"), firstT = (T.skaale && T.skaale[1]) || (T.klip && T.klip[0]);
+  if (firstT) { ex.href = vidUrl(firstT[0]); ex.textContent = firstT[0]; } else { ex.href = A.video; ex.textContent = "video"; }
+
+  // ---------- Fremskridt ----------
+  var SKEY = "sy-trin-" + location.pathname;
+  var steps = Array.prototype.slice.call(document.querySelectorAll(".step"));
+  var doneSet = {};
+  try { doneSet = JSON.parse(localStorage.getItem(SKEY) || "{}"); } catch (e) {}
+  function updSteps() {
+    var n = 0;
+    steps.forEach(function (st) { var on = !!doneSet[st.getAttribute("data-step")]; st.classList.toggle("done", on); st.querySelector(".donebox input").checked = on; if (on) n++; });
+    $("progressTxt").textContent = n + " af " + steps.length + " trin";
+    $("progressBar").style.width = (100 * n / steps.length) + "%";
+    try { localStorage.setItem(SKEY, JSON.stringify(doneSet)); } catch (e) {}
+  }
+  steps.forEach(function (st) {
+    st.querySelector(".donebox input").addEventListener("change", function (e) { doneSet[st.getAttribute("data-step")] = e.target.checked; updSteps(); });
+  });
+  $("resetStepsBtn").addEventListener("click", function () { doneSet = {}; updSteps(); });
+  updSteps();
+
+  // ---------- Gem mål lokalt ----------
+  var KEY = "sy-maal-v1";
+  var fields = ["bust", "ub", "bund", "laengde", "skaalH", "strop", "straek"];
+  var sliders = ["hAdj", "fylde", "rynk", "ease", "stropB"];
+  try {
+    var saved = JSON.parse(localStorage.getItem(KEY) || "{}");
+    fields.concat(sliders).forEach(function (k) { if (saved[k] != null) $(k).value = saved[k]; });
+    if (saved.easeAuto === false) $("easeAuto").checked = false;
+  } catch (e) {}
+  function save() {
+    try {
+      var o = {}; fields.concat(sliders).forEach(function (k) { o[k] = $(k).value; }); o.easeAuto = $("easeAuto").checked;
+      localStorage.setItem(KEY, JSON.stringify(o));
+    } catch (e) {}
+  }
+
+  // ---------- Geometri ----------
+  var SA = 10; // mm
+  var num = function (id) { var v = parseFloat($(id).value); return isFinite(v) ? v : 0; };
+  var clamp = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
+
+  function offsetPoly(pts, d) {
+    var n = pts.length, area = 0, i;
+    for (i = 0; i < n; i++) { var p = pts[i], q = pts[(i + 1) % n]; area += p[0] * q[1] - q[0] * p[1]; }
+    var s = area > 0 ? 1 : -1, lines = [];
+    for (i = 0; i < n; i++) {
+      var a = pts[i], b = pts[(i + 1) % n], dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1;
+      var nx = s * dy / L, ny = -s * dx / L;
+      lines.push({ p: [a[0] + nx * d[i], a[1] + ny * d[i]], v: [dx, dy], n: [nx, ny], d: d[i] });
+    }
+    var out = [], maxd = Math.max.apply(null, d);
+    for (i = 0; i < n; i++) {
+      var l1 = lines[(i - 1 + n) % n], l2 = lines[i], P = pts[i];
+      var cr = l1.v[0] * l2.v[1] - l1.v[1] * l2.v[0];
+      var nn = Math.hypot(l1.v[0], l1.v[1]) * Math.hypot(l2.v[0], l2.v[1]) || 1;
+      if (Math.abs(cr) / nn < 1e-3) { out.push([P[0] + l2.n[0] * l2.d, P[1] + l2.n[1] * l2.d]); continue; }
+      var t = ((l2.p[0] - l1.p[0]) * l2.v[1] - (l2.p[1] - l1.p[1]) * l2.v[0]) / cr;
+      var X = [l1.p[0] + t * l1.v[0], l1.p[1] + t * l1.v[1]];
+      if (Math.hypot(X[0] - P[0], X[1] - P[1]) > 3.5 * maxd) {
+        out.push([P[0] + l1.n[0] * l1.d, P[1] + l1.n[1] * l1.d]);
+        out.push([P[0] + l2.n[0] * l2.d, P[1] + l2.n[1] * l2.d]);
+      } else out.push(X);
+    }
+    return out;
+  }
+  var pathOf = function (pts) { return "M" + pts.map(function (p) { return p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" L") + " Z"; };
+  function bbox(pts) {
+    var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+    pts.forEach(function (p) { x0 = Math.min(x0, p[0]); y0 = Math.min(y0, p[1]); x1 = Math.max(x1, p[0]); y1 = Math.max(y1, p[1]); });
+    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+  }
+
+  function calc() {
+    var m = { bust: num("bust") * 10, ub: num("ub") * 10, bund: num("bund") * 10, laengde: num("laengde") * 10,
+              skaalH: num("skaalH") * 10, strop: num("strop") * 10, straek: num("straek") };
+    if ($("easeAuto").checked) $("ease").value = Math.round(clamp(m.straek * 0.25, 5, 15));
+    $("ease").disabled = $("easeAuto").checked;
+    var r = num("ease") / 100, hAdj = num("hAdj") * 10, fylde = num("fylde") * 10, rynk = num("rynk") / 100, sw = num("stropB") * 10;
+
+    $("o-hAdj").textContent = (hAdj > 0 ? "+" : "") + hAdj / 10 + " cm";
+    $("o-fylde").textContent = "+" + fylde / 10 + " cm";
+    $("o-rynk").textContent = Math.round(rynk * 100) + " %";
+    $("o-ease").textContent = Math.round(r * 100) + " % mindre";
+    $("o-stropB").textContent = sw / 10 + " cm";
+
+    // Advarsler
+    var w = [], diff = (m.bust - m.ub) / 10;
+    if (m.ub <= 0 || m.bust <= 0 || m.bund <= 0) w.push("Udfyld alle mål.");
+    if (diff < 4) w.push("Brystmål og underbrystmål ligger meget tæt. Tjek at begge er målt rigtigt.");
+    if (diff > 22) w.push("Ved stor forskel mellem bryst- og underbrystmål giver trekantskåle ofte mindre støtte. Regn med flere prøverunder.");
+    if (m.straek < 30) w.push("Stoffet strækker under 30 %. Toppen kan blive svær at få på. Brug helst strik med mindst 40 % stræk.");
+    if (m.laengde < 30 || m.laengde > 400) w.push("Længden under brystet ser usædvanlig ud. Den måles i cm fra underbrystet og ned.");
+    if (m.skaalH < 80 || m.skaalH > 260) w.push("Skålhøjden ser usædvanlig ud. Den er typisk mellem 10 og 22 cm.");
+    $("warnings").innerHTML = w.length ? "<b>⚠️ Tjek dine mål</b><ul class='plain'>" + w.map(function (x) { return "<li>" + x + "</li>"; }).join("") + "</ul>" : "";
+
+    // Mål på delene (sylinje, mm)
+    var F = m.ub / 2 * (1 - r);          // forstykke foroven
+    var Fb = m.bund / 2 * (1 - r);       // forstykke/ryg forneden
+    var Bt = m.ub / 2 * (1 - r);         // ryg foroven
+    var L = m.laengde;
+    var base = F / 2;                    // skålens underkant efter rynkning
+    var autoG = Math.max(0, (m.bust - m.ub - 80) * 0.3);
+    var cutBase = base * (1 + rynk) + autoG + fylde;
+    var gather = cutBase - base;
+    var h = m.skaalH * 0.95 + hAdj;
+    var ax = 0.22 * cutBase;
+    var Ls = m.strop + 250;              // + 25 cm til at binde
+    var Ldraw = Math.min(Ls, 110);
+
+    // Skål (sylinje)
+    var cup = [[0, 0], [ax - sw / 2, -h], [ax - sw / 2, -h - Ldraw], [ax + sw / 2, -h - Ldraw], [ax + sw / 2, -h]];
+    var s0 = [ax + sw / 2, -h], s1 = [cutBase, 0];
+    var len = Math.hypot(s1[0] - s0[0], s1[1] - s0[1]), dx = (s1[0] - s0[0]) / len, dy = (s1[1] - s0[1]) / len;
+    var c = [(s0[0] + s1[0]) / 2 + dy * len * 0.07, (s0[1] + s1[1]) / 2 - dx * len * 0.07];
+    for (var k = 1; k <= 16; k++) { var t = k / 16, u = 1 - t; cup.push([u * u * s0[0] + 2 * u * t * c[0] + t * t * s1[0], u * u * s0[1] + 2 * u * t * c[1] + t * t * s1[1]]); }
+    var cupD = cup.map(function () { return SA; });
+
+    var front = [[0, 0], [F, 0], [F / 2 + Fb / 2, L], [F / 2 - Fb / 2, L]];
+    var back = [[0, 0], [Bt, 0], [Bt / 2 + Fb / 2, L], [Bt / 2 - Fb / 2, L]];
+    var bandD = [SA, SA, 2 * SA, SA];
+
+    var pieces = [
+      { navn: "SKÅL", klip: "Klip 4: 2 i yderstof og 2 i foer. Spejlvend 1 af hver.", seam: cup, cut: offsetPoly(cup, cupD), type: "cup" },
+      { navn: "FORSTYKKE", klip: "Klip 1", seam: front, cut: offsetPoly(front, bandD), type: "front" },
+      { navn: "RYGSTYKKE", klip: "Klip 1", seam: back, cut: offsetPoly(back, bandD), type: "back" }
+    ];
+
+    // Placering på arket (mm)
+    var x = 0, y = 125, rowH = 0, maxW = 370;
+    pieces.forEach(function (p) {
+      var b = bbox(p.cut);
+      if (x > 0 && x + b.w > maxW) { x = 0; y += rowH + 15; rowH = 0; }
+      p.dx = x - b.x; p.dy = y - b.y; p.b = b;
+      x += b.w + 15; rowH = Math.max(rowH, b.h);
+    });
+    var W = Math.max(maxW, x), H = y + rowH + 5;
+
+    var info = { m: m, r: r, F: F, Fb: Fb, Bt: Bt, L: L, base: base, cutBase: cutBase, gather: gather, h: h, Ls: Ls, Ldraw: Ldraw, ax: ax, sw: sw };
+    return { pieces: pieces, W: W, H: H, info: info };
+  }
+
+  function txt(x, y, s, size, extra) { return '<text x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" font-size="' + size + '" font-family="Avenir Next, Helvetica, Arial" ' + (extra || "") + ">" + s + "</text>"; }
+
+  function drawAll(R) {
+    var I = R.info, s = "";
+    // Prøvefirkant
+    s += '<rect x="0" y="0" width="100" height="100" fill="none" stroke="#2b2433" stroke-width="0.6"/>';
+    s += txt(50, 46, "10 × 10 cm", 7, 'text-anchor="middle" font-weight="700"');
+    s += txt(50, 56, "Mål efter, før du klipper", 4.5, 'text-anchor="middle" fill="#6d6577"');
+    s += txt(110, 12, esc(A.titel), 7, 'font-weight="700"');
+    s += txt(110, 20, "Mønster efter dine mål", 5, 'fill="#e8456b" font-weight="700"');
+    ["Hel linje = klip", "Stiplet linje = sy", "Sømrum er lagt til (1 cm, bundkant 2 cm)", "STRÆK-pilene følger stoffets stræk"].forEach(function (l, i) {
+      s += txt(110, 32 + i * 7, l, 4.5, 'fill="#6d6577"');
+    });
+
+    R.pieces.forEach(function (p) {
+      var g = '<g transform="translate(' + p.dx.toFixed(1) + " " + p.dy.toFixed(1) + ')">';
+      g += '<path d="' + pathOf(p.cut) + '" fill="#fff4f7" stroke="#2b2433" stroke-width="0.7"/>';
+      g += '<path d="' + pathOf(p.seam) + '" fill="none" stroke="#e8456b" stroke-width="0.5" stroke-dasharray="3 2"/>';
+      var b = bbox(p.seam), cx = b.x + b.w / 2;
+      if (p.type === "cup") {
+        var cyy = -I.h * 0.35, tx = I.cutBase * 0.5;
+        g += txt(tx, cyy, "SKÅL", 7, 'text-anchor="middle" font-weight="700"');
+        g += txt(tx, cyy + 7, "Klip 4 (2 yder + 2 foer)", 4.2, 'text-anchor="middle"');
+        g += txt(tx, cyy + 12.5, "Spejlvend 1 af hver", 4.2, 'text-anchor="middle"');
+        // stræk-pil
+        g += '<line x1="' + (tx - 25) + '" y1="' + (cyy + 22) + '" x2="' + (tx + 25) + '" y2="' + (cyy + 22) + '" stroke="#1f9e95" stroke-width="0.8" marker-start="url(#ar)" marker-end="url(#ar)"/>';
+        g += txt(tx, cyy + 28, "STRÆK", 4, 'text-anchor="middle" fill="#1f9e95" font-weight="700"');
+        // rynkemærker
+        if (I.gather > 3) {
+          [0.15, 0.85].forEach(function (f) { var xx = I.cutBase * f; g += '<path d="M' + xx + ' ' + (SA) + ' l-2 -4 h4 z" fill="#e8456b"/>'; });
+          g += txt(I.cutBase / 2, -4, "Rynk mellem ▲ til " + (I.base / 10).toFixed(1) + " cm", 4, 'text-anchor="middle" fill="#e8456b"');
+        }
+        // strop-forlængelse
+        var sx = I.ax, sy = -I.h - I.Ldraw;
+        if (I.Ls > I.Ldraw) {
+          g += '<line x1="' + (sx - 12) + '" y1="' + (sy + 25) + '" x2="' + (sx + 12) + '" y2="' + (sy + 25) + '" stroke="#2b2433" stroke-width="0.5" stroke-dasharray="1.5 1.5"/>';
+          g += '<g transform="translate(' + (sx + I.sw / 2 + SA + 3) + " " + (sy + 8) + ')">' +
+               txt(0, 0, "STROP fortsætter lige op:", 4, 'font-weight="700"') +
+               txt(0, 5.5, "i alt " + (I.Ls / 10).toFixed(0) + " cm fra skålens top", 4) +
+               txt(0, 11, "(heraf 25 cm til at binde)", 4, 'fill="#6d6577"') + "</g>";
+        }
+      } else {
+        var cy = b.y + b.h / 2;
+        g += txt(cx, cy - 4, p.navn, 7, 'text-anchor="middle" font-weight="700"');
+        g += txt(cx, cy + 3, p.klip, 4.2, 'text-anchor="middle"');
+        g += '<line x1="' + (cx - 25) + '" y1="' + (cy + 10) + '" x2="' + (cx + 25) + '" y2="' + (cy + 10) + '" stroke="#1f9e95" stroke-width="0.8" marker-start="url(#ar)" marker-end="url(#ar)"/>';
+        g += txt(cx, cy + 16, "STRÆK", 4, 'text-anchor="middle" fill="#1f9e95" font-weight="700"');
+        g += txt(cx, b.y + b.h + SA + 6, "Bundkant: buk 1 cm + 1 cm", 3.8, 'text-anchor="middle" fill="#6d6577"');
+        if (p.type === "front") {
+          g += '<path d="M' + cx + " " + (-SA) + ' l-2 -4 h4 z" fill="#e8456b" transform="rotate(180 ' + cx + " " + (-SA - 2) + ')"/>';
+          g += txt(cx, 6, "Midt foran: skålene mødes her", 3.8, 'text-anchor="middle" fill="#e8456b"');
+        } else {
+          g += txt(cx, 6, "Overkant: buk 0,5 + 0,5 cm og sy med zigzag", 3.8, 'text-anchor="middle" fill="#6d6577"');
+        }
+      }
+      s += g + "</g>";
+    });
+    var defs = '<defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10z" fill="#1f9e95"/></marker></defs>';
+    return defs + s;
+  }
+
+  function render() {
+    save();
+    var R = calc(), I = R.info, content = drawAll(R);
+    $("preview").innerHTML = '<svg viewBox="-5 -5 ' + (R.W + 10) + " " + (R.H + 10) + '" xmlns="http://www.w3.org/2000/svg">' + content + "</svg>";
+    var cols = Math.ceil(R.W / 190), rows = Math.ceil(R.H / 277);
+    $("chips").innerHTML = ['Skål: ' + (I.cutBase / 10).toFixed(1) + ' cm bred forneden',
+      'Rynkes til ' + (I.base / 10).toFixed(1) + ' cm', 'Strop i alt ' + (I.Ls / 10).toFixed(0) + ' cm',
+      'Krop ' + Math.round(I.r * 100) + ' % mindre end mål', (cols * rows + 1) + ' A4-sider'].map(function (c) { return '<span class="chip">' + c + "</span>"; }).join("");
+    var cm = function (v) { return (v / 10).toFixed(1).replace(".", ",") + " cm"; };
+    $("cutlist").innerHTML =
+      "<tr><td><b>Skål</b></td><td>4 (2 yder + 2 foer)</td><td>Underkant " + cm(I.cutBase) + " (rynkes til " + cm(I.base) + "), højde " + cm(I.h) + ", strop " + cm(I.Ls) + " × " + cm(I.sw) + "</td></tr>" +
+      "<tr><td><b>Forstykke</b></td><td>1</td><td>Foroven " + cm(I.F) + ", forneden " + cm(I.Fb) + ", højde " + cm(I.L) + "</td></tr>" +
+      "<tr><td><b>Rygstykke</b></td><td>1</td><td>Foroven " + cm(I.Bt) + ", forneden " + cm(I.Fb) + ", højde " + cm(I.L) + "</td></tr>";
+    var vals = { base: cm(I.base), Ls: cm(I.Ls), gather: cm(I.gather), cutBase: cm(I.cutBase) };
+    document.querySelectorAll("[data-v]").forEach(function (el) { el.textContent = vals[el.getAttribute("data-v")] || ""; });
+    return { R: R, content: content, cols: cols, rows: rows };
+  }
+
+  function buildPrint() {
+    var X = render(), R = X.R, I = R.info, html = "";
+    var mm = function (v) { return (v / 10).toFixed(1).replace(".", ",") + " cm"; };
+    // Forside
+    var map = "";
+    for (var r = 0; r < X.rows; r++) { map += "<tr>"; for (var c = 0; c < X.cols; c++) map += '<td style="border:1px solid #999;text-align:center;padding:4mm 6mm;font-weight:700;">' + String.fromCharCode(65 + c) + (r + 1) + "</td>"; map += "</tr>"; }
+    html += '<div class="sheet sumpage"><div style="color:#e8456b;font-weight:700;letter-spacing:2px;font-size:9pt;">MØNSTER EFTER DINE MÅL</div><h1 style="margin:2mm 0 4mm;">' + esc(A.titel) + "</h1>" +
+      "<p>Mål brugt: bryst " + mm(I.m.bust) + ", underbryst " + mm(I.m.ub) + ", bund " + mm(I.m.bund) + ", længde " + mm(I.m.laengde) + ", skålhøjde " + mm(I.m.skaalH) + ", strop " + mm(I.m.strop) + ", stræk " + I.m.straek + " %.</p>" +
+      "<p>Justeringer: skålhøjde " + num("hAdj") + " cm, ekstra fylde " + num("fylde") + " cm, rynk " + num("rynk") + " %, stramhed " + Math.round(I.r * 100) + " %, strop " + num("stropB") + " cm.</p>" +
+      '<h3>Sådan samler du arkene</h3><p>Klip den hvide kant af langs den tynde ramme, og tape arkene sammen efter bogstav og tal:</p><table style="border-collapse:collapse;margin:3mm 0 6mm;">' + map + "</table>" +
+      "<h3>Klippeliste</h3><table>" + $("cutlist").innerHTML + "</table>" +
+      '<p style="margin-top:6mm;"><b>Tjek:</b> prøvefirkanten på ark A1 skal være præcis 10 × 10 cm. Ellers er der printet i forkert skala.</p>' +
+      '<p style="color:#6d6577;font-size:9pt;margin-top:8mm;">Selvstændigt mønster lavet af Claude ud fra dine mål. Første udgave: sy en prøve i et billigt stof først.</p></div>';
+    for (var rr = 0; rr < X.rows; rr++) for (var cc = 0; cc < X.cols; cc++) {
+      var x0 = cc * 190, y0 = rr * 277, lab = String.fromCharCode(65 + cc) + (rr + 1);
+      html += '<div class="sheet"><svg xmlns="http://www.w3.org/2000/svg" width="190mm" height="277mm" viewBox="' + x0 + " " + y0 + ' 190 277">' +
+        '<rect x="' + x0 + '" y="' + y0 + '" width="190" height="277" fill="none" stroke="#999" stroke-width="0.25"/>' +
+        txt(x0 + 186, y0 + 273, lab, 9, 'text-anchor="end" fill="#bbb" font-weight="700"') + X.content + "</svg></div>";
+    }
+    $("print").innerHTML = html;
+  }
+
+  fields.concat(sliders).forEach(function (k) { $(k).addEventListener("input", render); });
+  $("easeAuto").addEventListener("change", render);
+  $("printBtn").addEventListener("click", function () { document.body.classList.remove("pg"); buildPrint(); window.print(); });
+  $("printGuideBtn").addEventListener("click", function () { document.body.classList.add("pg"); window.print(); });
+  window.addEventListener("afterprint", function () { document.body.classList.remove("pg"); });
+  $("resetBtn").addEventListener("click", function () { $("hAdj").value = 0; $("fylde").value = 0; $("rynk").value = 10; $("stropB").value = 2.5; $("easeAuto").checked = true; render(); });
+  window.addEventListener("beforeprint", buildPrint);
+  render();
+  if (location.hash === "#print") buildPrint();
+  if (location.hash === "#printguide") document.body.classList.add("pg");
+})();
+</script>
+</body>
+</html>
